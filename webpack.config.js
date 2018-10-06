@@ -29,6 +29,10 @@ module.exports = (env, argv) => {
         },
         {
           from: `${SOURCE_FOLDER}/style.css`
+        },
+        {
+          from: `${SOURCE_FOLDER}/images`,
+          to: 'images'
         }
       ])
     ]

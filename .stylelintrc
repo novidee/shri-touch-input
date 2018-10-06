@@ -1,5 +1,4 @@
 {
-  "syntax": "less",
   "extends": [
     "stylelint-config-standard"
   ],
