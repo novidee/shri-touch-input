@@ -26,7 +26,7 @@ class PinchGesture {
       return this.currentScale / originalZoomFactor;
     };
 
-    if (prevDiff > 0 && Math.abs(currentDiff - prevDiff) < 20) {
+    if (prevDiff > 0 && Math.abs(currentDiff - prevDiff) < 10) {
       scaleZoomFactor(currentDiff / prevDiff);
       this.node.style.transform = `scale(${this.currentScale})`;
     }

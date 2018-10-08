@@ -26,9 +26,9 @@ class DragGesture {
 
     // if (Math.abs(startPosition.y + dy) > maxDelta) return;
 
-    const r = Math.abs(startPosition.y + dy) > maxDelta ? maxDelta : startPosition.y + dy;
+    // const r = Math.abs(startPosition.y + dy) > maxDelta ? maxDelta : startPosition.y + dy;
 
-    this.node.style.backgroundPosition = `${startPosition.x + dx}px ${r}`;
+    this.node.style.backgroundPosition = `${startPosition.x + dx}px 100%`;
     // this.node.style.backgroundPositionY = `${(startPosition.y + dy)}px`;
 
     const ddd = document.querySelector('.angle');
@@ -36,7 +36,7 @@ class DragGesture {
 
     this.lastPosition = {
       x: startPosition.x + dx,
-      y: startPosition.y + dy
+      // y: Math.abs(startPosition.y + dy) > maxDelta ? maxDelta : startPosition.y + dy
     };
   }
 
