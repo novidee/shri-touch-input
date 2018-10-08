@@ -1,6 +1,8 @@
 import { getAngle, getMidpoint, getRightestPointer } from '../utils';
 
-const HALF_CIRCLE_DEGREES = 180;
+const UNFOLDED_ANGLE = 180;
+const RIGHT_ANGLE = 90;
+const PERCENT_PER_UNIT = 100;
 
 class RotateGesture {
   constructor(node) {
@@ -9,14 +11,14 @@ class RotateGesture {
     this.brightness = 1;
     this.MIN_BRIGHTNESS = 0;
     this.MAX_BRIGHTNESS = 2;
-    this.POINTERS_LENGTH = 2;
+    this.POINTERS_COUNT = 2;
 
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerCancel = this.onPointerCancel.bind(this);
   }
 
   perform(pointers) {
-    if (pointers.length !== this.POINTERS_LENGTH) return;
+    if (pointers.length !== this.POINTERS_COUNT) return;
 
     const { prevAngle, MAX_BRIGHTNESS, MIN_BRIGHTNESS } = this;
 
@@ -42,20 +44,20 @@ class RotateGesture {
 
     let distance = prevAngle - currentAngle;
 
-    if (distance > 100) distance -= HALF_CIRCLE_DEGREES;
-    else if (distance < -100) distance += HALF_CIRCLE_DEGREES;
+    if (distance > RIGHT_ANGLE) distance -= UNFOLDED_ANGLE;
+    else if (distance < -RIGHT_ANGLE) distance += UNFOLDED_ANGLE;
 
     let currentBrightness = this.brightness
-      + (distance / HALF_CIRCLE_DEGREES * (MAX_BRIGHTNESS - MIN_BRIGHTNESS));
+      + (distance / UNFOLDED_ANGLE * (MAX_BRIGHTNESS - MIN_BRIGHTNESS));
     currentBrightness = Math.min(MAX_BRIGHTNESS, Math.max(currentBrightness, MIN_BRIGHTNESS));
 
     this.prevAngle = currentAngle;
     this.brightness = currentBrightness;
 
-    this.node.style.filter = `brightness(${currentBrightness * 100}%)`;
+    this.node.style.filter = `brightness(${currentBrightness * PERCENT_PER_UNIT}%)`;
 
     const valueNode = document.querySelector('.view-info__field--brightness .view-info__value');
-    valueNode.innerHTML = `${Math.round(currentBrightness * 100)}%`;
+    valueNode.innerHTML = `${Math.round(currentBrightness * PERCENT_PER_UNIT)}%`;
   }
 
   reset() {
