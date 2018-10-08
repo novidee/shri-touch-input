@@ -5,6 +5,8 @@
     "es6": true
   },
   "rules": {
-    "comma-dangle": ["error", "never"]
+    "comma-dangle": ["error", "never"],
+    "no-confusing-arrow": 0,
+    "object-curly-newline": 0
   }
 }
