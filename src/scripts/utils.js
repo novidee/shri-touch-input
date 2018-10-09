@@ -1,33 +1,3 @@
-function throttle(func, ms) {
-  let isThrottled = false;
-  let savedArgs = null;
-  let savedThis = null;
-
-  function wrapper(...args) {
-    if (isThrottled) {
-      savedArgs = args;
-      savedThis = this;
-      return;
-    }
-
-    func.apply(this, args);
-
-    isThrottled = true;
-
-    setTimeout(() => {
-      isThrottled = false;
-
-      if (savedArgs) {
-        wrapper.apply(savedThis, savedArgs);
-        savedArgs = null;
-        savedThis = null;
-      }
-    }, ms);
-  }
-
-  return wrapper;
-}
-
 function getDistanceBetweenTwoPoints(x0, x1, y0, y1) {
   return Math.hypot(x1 - x0, y1 - y0);
 }
