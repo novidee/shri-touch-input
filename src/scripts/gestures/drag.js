@@ -1,6 +1,5 @@
 class DragGesture {
   constructor() {
-    this.isActive = true;
     this.lastPosition = { x: 0, y: 0 };
     this.gesturePosition = { x: 0, y: 0 };
     this.POINTERS_COUNT = 1;
@@ -10,16 +9,14 @@ class DragGesture {
   }
 
   perform(pointers, event, state) {
-    const { isActive, gesturePosition, lastPosition, POINTERS_COUNT } = this;
+    const { gesturePosition, lastPosition, POINTERS_COUNT } = this;
 
     if (pointers.length !== POINTERS_COUNT) return state;
 
     const { scale = 1 } = state;
-    if (!isActive) return state;
 
     const { x, y } = event;
     const { movementX, movementY } = this.getMovement(event, gesturePosition);
-
     const dx = movementX / scale;
     const dy = movementY / scale;
 
@@ -51,7 +48,6 @@ class DragGesture {
   }
 
   onPointerDown(event) {
-    this.isActive = true;
     this.gesturePosition = { x: event.x, y: event.y };
   }
 
