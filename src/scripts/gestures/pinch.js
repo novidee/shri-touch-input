@@ -13,8 +13,8 @@ class PinchGesture {
     this.onPointerCancel = this.onPointerCancel.bind(this);
   }
 
-  perform(pointers) {
-    if (pointers.length !== this.POINTERS_COUNT) return;
+  perform(pointers, event, state) {
+    if (pointers.length !== this.POINTERS_COUNT) return state;
 
     const { prevDiff, MIN_DIFF } = this;
 
@@ -34,9 +34,9 @@ class PinchGesture {
     this.prevDiff = currentDiff;
     this.currentScale = newScale;
 
-    return {
+    return Object.assign({}, state, {
       scale: newScale
-    };
+    });
   }
 
   reset() {

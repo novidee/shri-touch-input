@@ -15,6 +15,7 @@ class PointerController {
       scale: 1,
       angleDistance: 0
     };
+
     this.onMove = onMove;
 
     this.onPointerDown = this.onPointerDown.bind(this);
@@ -25,6 +26,8 @@ class PointerController {
 
   init() {
     this.subscribeEvents();
+
+    this.onMove(this.state);
   }
 
   subscribeEvents() {
@@ -89,7 +92,7 @@ class PointerController {
     const { gestures, pointers } = this;
 
     gestures.forEach((gesture) => {
-      this.state = Object.assign({}, this.state, gesture.perform(pointers, event, this.state));
+      this.state = gesture.perform(pointers, event, this.state);
     });
 
     this.onMove(this.state);

@@ -4,8 +4,7 @@ const UNFOLDED_ANGLE = 180;
 const RIGHT_ANGLE = 90;
 
 class RotateGesture {
-  constructor(node) {
-    this.node = node;
+  constructor() {
     this.prevAngle = 0;
     this.POINTERS_COUNT = 2;
 
@@ -13,8 +12,8 @@ class RotateGesture {
     this.onPointerCancel = this.onPointerCancel.bind(this);
   }
 
-  perform(pointers) {
-    if (pointers.length !== this.POINTERS_COUNT) return;
+  perform(pointers, event, state) {
+    if (pointers.length !== this.POINTERS_COUNT) return state;
 
     const { prevAngle } = this;
 
@@ -35,7 +34,7 @@ class RotateGesture {
 
     if (prevAngle === 0) {
       this.prevAngle = currentAngle;
-      return;
+      return state;
     }
 
     let distance = prevAngle - currentAngle;
@@ -45,9 +44,9 @@ class RotateGesture {
 
     this.prevAngle = currentAngle;
 
-    return {
+    return Object.assign({}, state, {
       angleDistance: distance
-    };
+    });
   }
 
   reset() {
