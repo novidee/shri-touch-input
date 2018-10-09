@@ -22,6 +22,26 @@ class PointerController {
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerCancel = this.onPointerCancel.bind(this);
+
+    document.exitPointerLock = document.exitPointerLock
+      || document.mozExitPointerLock
+      || document.webkitExitPointerLock;
+
+    this.node.requestPointerLock = this.node.requestPointerLock
+      || this.node.mozRequestPointerLock
+      || this.node.webkitRequestPointerLock;
+  }
+
+  isLocked() {
+    return this.node === document.pointerLockElement
+      || this.node === document.mozPointerLockElement
+      || this.node === document.webkitPointerLockElement;
+  }
+
+  hasPointerLock() {
+    return 'pointerLockElement' in document
+      || 'mozPointerLockElement' in document
+      || 'webkitPointerLockElement' in document;
   }
 
   init() {
@@ -41,7 +61,6 @@ class PointerController {
 
   removePointer(event) {
     this.pointers = this.pointers.filter(pointer => pointer.pointerId !== event.pointerId);
-    this.node.releasePointerCapture(event.pointerId);
   }
 
   addPointer(event) {
@@ -63,20 +82,28 @@ class PointerController {
   }
 
   onPointerUp(event) {
-    this.removePointer(event);
+    if (!this.hasPointerLock()) this.removePointer(event);
 
     this.notify(event);
   }
 
   onPointerCancel(event) {
-    this.removePointer(event);
+    if (!this.hasPointerLock()) this.removePointer(event);
 
     this.notify(event);
   }
 
   onPointerDown(event) {
-    this.node.setPointerCapture(event.pointerId);
     this.addPointer(event);
+
+    if (!this.isLocked()) {
+      this.node.requestPointerLock();
+    } else {
+      document.exitPointerLock();
+
+      if (this.hasPointerLock()) this.removePointer(event);
+    }
+
 
     this.notify(event, this.state);
   }

@@ -1,18 +1,16 @@
 class DragGesture {
   constructor() {
-    this.isActive = false;
+    this.isActive = true;
     this.lastPosition = { x: 0, y: 0 };
     this.gesturePosition = { x: 0, y: 0 };
-    this.startPosition = { x: 0, y: 0 };
     this.POINTERS_COUNT = 1;
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
-    this.onPointerCancel = this.onPointerCancel.bind(this);
   }
 
   perform(pointers, event, state) {
-    const { isActive, gesturePosition, startPosition, POINTERS_COUNT } = this;
+    const { isActive, gesturePosition, lastPosition, POINTERS_COUNT } = this;
 
     if (pointers.length !== POINTERS_COUNT) return state;
 
@@ -20,16 +18,16 @@ class DragGesture {
     if (!isActive) return state;
 
     const { x, y } = event;
-    const dx = (x - gesturePosition.x) / scale;
-    const dy = (y - gesturePosition.y) / scale;
+    const { movementX, movementY } = this.getMovement(event, gesturePosition);
 
-    const newX = startPosition.x + dx;
-    const newY = startPosition.y + dy;
+    const dx = movementX / scale;
+    const dy = movementY / scale;
 
-    this.lastPosition = {
-      x: newX,
-      y: newY
-    };
+    const newX = lastPosition.x + dx;
+    const newY = lastPosition.y + dy;
+
+    this.lastPosition = { x: newX, y: newY };
+    this.gesturePosition = { x, y };
 
     return Object.assign({}, state, {
       x: newX,
@@ -37,18 +35,28 @@ class DragGesture {
     });
   }
 
+  getMovement(event, gesturePosition) {
+    const { x, y } = event;
+
+    const prevX = gesturePosition.x === 0 ? x : gesturePosition.x;
+    const prevY = gesturePosition.y === 0 ? y : gesturePosition.y;
+
+    const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || x - prevX;
+    const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || y - prevY;
+
+    return {
+      movementX,
+      movementY
+    };
+  }
+
   onPointerDown(event) {
     this.isActive = true;
     this.gesturePosition = { x: event.x, y: event.y };
-    this.startPosition = { x: this.lastPosition.x, y: this.lastPosition.y };
   }
 
   onPointerUp() {
-    this.isActive = false;
-  }
-
-  onPointerCancel() {
-    this.isActive = false;
+    this.gesturePosition = { x: 0, y: 0 };
   }
 }
 

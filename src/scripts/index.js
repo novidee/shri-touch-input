@@ -30,7 +30,7 @@ const updateImage = (state) => {
   const { x, scale, angleDistance } = state;
 
   let currentBrightness = brightness
-    + (angleDistance / UNFOLDED_ANGLE * (MAX_BRIGHTNESS - MIN_BRIGHTNESS));
+    + (-angleDistance / UNFOLDED_ANGLE * (MAX_BRIGHTNESS - MIN_BRIGHTNESS));
   currentBrightness = Math.min(MAX_BRIGHTNESS, Math.max(currentBrightness, MIN_BRIGHTNESS));
 
   brightness = currentBrightness;
