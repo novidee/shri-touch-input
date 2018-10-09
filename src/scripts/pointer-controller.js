@@ -6,11 +6,16 @@ const EVENT_HANDLER = {
 };
 
 class PointerController {
-  constructor({ node, gestures }) {
+  constructor({ node, gestures, onMove }) {
     this.node = node;
     this.pointers = [];
     this.gestures = gestures;
-    this.state = {};
+    this.state = {
+      x: 0,
+      scale: 1,
+      angleDistance: 0
+    };
+    this.onMove = onMove;
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
@@ -86,6 +91,8 @@ class PointerController {
     gestures.forEach((gesture) => {
       this.state = Object.assign({}, this.state, gesture.perform(pointers, event, this.state));
     });
+
+    this.onMove(this.state);
   }
 }
 

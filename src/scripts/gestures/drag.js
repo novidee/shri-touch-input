@@ -5,6 +5,9 @@ class DragGesture {
     this.lastPosition = { x: 0, y: 0 };
     this.gesturePosition = { x: 0, y: 0 };
     this.startPosition = { x: 0, y: 0 };
+    this.POINTERS_COUNT = 1;
+    this.PICTURE_WIDTH = 4821;
+    this.PICTURE_HEIGHT = 928;
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
@@ -12,9 +15,10 @@ class DragGesture {
   }
 
   perform(pointers, event, state) {
-    if (pointers.length !== 1) return;
+    const { isActive, gesturePosition, startPosition, POINTERS_COUNT } = this;
 
-    const { isActive, gesturePosition, startPosition } = this;
+    if (pointers.length !== POINTERS_COUNT) return;
+
     const { scale = 1 } = state;
     if (!isActive) return;
 
@@ -22,25 +26,39 @@ class DragGesture {
     const dx = (x - gesturePosition.x) / scale;
     const dy = (y - gesturePosition.y) / scale;
 
-    const maxDelta = (document.documentElement.clientHeight - document.documentElement.clientHeight / scale) / 2;
+    const newX = startPosition.x + dx;
+    const newY = startPosition.y + dy;
 
-    // if (Math.abs(startPosition.y + dy) > maxDelta) return;
+    this.node.style.backgroundPosition = `${newX}px 100%`;
 
-    // const r = Math.abs(startPosition.y + dy) > maxDelta ? maxDelta : startPosition.y + dy;
+    const { clientWidth: documentWidth, offsetHeight: documentHeight } = document.documentElement;
+    const squeezeRate = documentHeight / this.PICTURE_HEIGHT;
 
-    this.node.style.backgroundPosition = `${startPosition.x + dx}px 100%`;
-    // this.node.style.backgroundPositionY = `${(startPosition.y + dy)}px`;
+    const preview = document.querySelector('.view-info__preview');
+    const indicator = document.querySelector('.view-info__indicator');
+    const previewWidth = preview.clientWidth;
+    const pictureRate = documentWidth / this.PICTURE_WIDTH / squeezeRate;
 
-    const ddd = document.querySelector('.angle');
-    // ddd.innerHTML = maxDelta;
+    const previewIndicatorWidth = pictureRate / scale * previewWidth;
+    const previewCenterOffset = (pictureRate * previewWidth) - (pictureRate * previewWidth / scale);
+
+    const indicatorX = -previewWidth / (this.PICTURE_WIDTH * squeezeRate) * newX
+      + previewCenterOffset / 2;
+
+    indicator.style.backgroundImage = `repeating-linear-gradient(to right, transparent, transparent ${previewIndicatorWidth}px, rgba(0,0,0, 0.5) ${previewIndicatorWidth}px, rgba(0,0,0, 0.5) 100%)`;
+    indicator.style.backgroundPosition = `${indicatorX}px 100%`;
 
     this.lastPosition = {
-      x: startPosition.x + dx,
-      // y: Math.abs(startPosition.y + dy) > maxDelta ? maxDelta : startPosition.y + dy
+      x: newX,
+      y: newY
+    };
+
+    return {
+      x: newX
     };
   }
 
-  onPointerDown(event, state) {
+  onPointerDown(event) {
     this.isActive = true;
     this.gesturePosition = { x: event.x, y: event.y };
     this.startPosition = { x: this.lastPosition.x, y: this.lastPosition.y };

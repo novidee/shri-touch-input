@@ -58,6 +58,10 @@ class RotateGesture {
 
     const valueNode = document.querySelector('.view-info__field--brightness .view-info__value');
     valueNode.innerHTML = `${Math.round(currentBrightness * PERCENT_PER_UNIT)}%`;
+
+    return {
+      angleDistance: distance
+    };
   }
 
   reset() {

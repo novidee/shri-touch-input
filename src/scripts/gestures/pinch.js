@@ -10,7 +10,7 @@ class PinchGesture {
     this.MIN_SCALE = 1;
     this.MAX_SCALE = 4;
     this.POINTERS_COUNT = 2;
-    this.MIN_DIFF = 10;
+    this.MIN_DIFF = 20;
 
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerCancel = this.onPointerCancel.bind(this);
