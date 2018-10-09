@@ -1,6 +1,5 @@
 class DragGesture {
-  constructor(node) {
-    this.node = node;
+  constructor() {
     this.isActive = false;
     this.lastPosition = { x: 0, y: 0 };
     this.gesturePosition = { x: 0, y: 0 };
@@ -28,8 +27,6 @@ class DragGesture {
 
     const newX = startPosition.x + dx;
     const newY = startPosition.y + dy;
-
-    this.node.style.backgroundPosition = `${newX}px 100%`;
 
     const { clientWidth: documentWidth, offsetHeight: documentHeight } = document.documentElement;
     const squeezeRate = documentHeight / this.PICTURE_HEIGHT;

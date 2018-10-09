@@ -1,10 +1,7 @@
 import { getDistanceBetweenTwoPoints } from '../utils';
 
-const PERCENT_PER_UNIT = 100;
-
 class PinchGesture {
-  constructor(node) {
-    this.node = node;
+  constructor() {
     this.prevDiff = -1;
     this.currentScale = 1;
     this.MIN_SCALE = 1;
@@ -29,18 +26,16 @@ class PinchGesture {
       secondPointer.clientY
     ));
 
+    let newScale = this.currentScale;
     if (prevDiff > 0 && Math.abs(currentDiff - prevDiff) < MIN_DIFF) {
-      this.changeScaleFactor(currentDiff / prevDiff);
-      this.node.style.transform = `scale(${this.currentScale})`;
+      newScale = this.changeScaleFactor(currentDiff / prevDiff);
     }
 
     this.prevDiff = currentDiff;
-
-    const valueNode = document.querySelector('.view-info__field--scale .view-info__value');
-    valueNode.innerHTML = `${Math.round(this.currentScale * PERCENT_PER_UNIT)}%`;
+    this.currentScale = newScale;
 
     return {
-      scale: this.currentScale
+      scale: newScale
     };
   }
 
@@ -52,7 +47,7 @@ class PinchGesture {
     const { currentScale, MAX_SCALE, MIN_SCALE } = this;
 
     const newScale = currentScale * scale;
-    this.currentScale = Math.min(MAX_SCALE, Math.max(newScale, MIN_SCALE));
+    return Math.min(MAX_SCALE, Math.max(newScale, MIN_SCALE));
   }
 
   onPointerCancel() {
