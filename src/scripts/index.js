@@ -14,6 +14,7 @@ const MIN_BRIGHTNESS = 0;
 const MAX_BRIGHTNESS = 2;
 
 let brightness = 1;
+let prevAngleDistance = 0;
 let image = null;
 
 const downloadImage = () => (
@@ -29,11 +30,14 @@ const downloadImage = () => (
 const updateImage = (state) => {
   const { x, scale, angleDistance } = state;
 
-  let currentBrightness = brightness
-    + (-angleDistance / UNFOLDED_ANGLE * (MAX_BRIGHTNESS - MIN_BRIGHTNESS));
-  currentBrightness = Math.min(MAX_BRIGHTNESS, Math.max(currentBrightness, MIN_BRIGHTNESS));
+  let currentBrightness = brightness;
+  if (prevAngleDistance !== angleDistance) {
+    currentBrightness += (-angleDistance / UNFOLDED_ANGLE * (MAX_BRIGHTNESS - MIN_BRIGHTNESS));
+    currentBrightness = Math.min(MAX_BRIGHTNESS, Math.max(currentBrightness, MIN_BRIGHTNESS));
 
-  brightness = currentBrightness;
+    brightness = currentBrightness;
+  }
+  prevAngleDistance = angleDistance;
 
   view.style.filter = `brightness(${currentBrightness * PERCENT_PER_UNIT}%)`;
   view.style.backgroundPosition = `${x}px 100%`;

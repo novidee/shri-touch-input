@@ -104,7 +104,6 @@ class PointerController {
       if (this.hasPointerLock()) this.removePointer(event);
     }
 
-
     this.notify(event, this.state);
   }
 
