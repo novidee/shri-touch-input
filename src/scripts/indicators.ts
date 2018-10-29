@@ -1,21 +1,30 @@
+import { PointersState } from './abstractions/types';
+
 const PERCENT_PER_UNIT = 100;
 
 const SELECTORS = {
   preview: '.view-info__preview',
   indicator: '.view-info__indicator',
   scaleValue: '.view-info__field--scale .view-info__value',
-  brightnessValue: '.view-info__field--brightness .view-info__value'
+  brightnessValue: '.view-info__field--brightness .view-info__value',
 };
 
-const updateIndicators = ({ x, scale }, { brightnessValue, image }) => {
-  const { clientWidth: documentWidth, offsetHeight: documentHeight } = document.documentElement;
+const updateIndicators = ({ x, scale }: PointersState,
+  { brightnessValue, image }: { brightnessValue: number, image: HTMLImageElement }) => {
+  const documentElement = document.documentElement;
+  if (!documentElement) return;
+
+  const { clientWidth: documentWidth, offsetHeight: documentHeight } = documentElement;
   const pixelRatio = window.devicePixelRatio;
   const imageWidth = image.width / pixelRatio;
   const imageHeight = image.height / pixelRatio;
   const squeezeRate = documentHeight / imageHeight;
 
   const preview = document.querySelector(SELECTORS.preview);
-  const indicator = document.querySelector(SELECTORS.indicator);
+  const indicator = <HTMLElement>document.querySelector(SELECTORS.indicator);
+
+  if (!preview || !indicator) return;
+
   const previewWidth = preview.clientWidth;
   const pictureRate = documentWidth / imageWidth / squeezeRate;
 
@@ -34,12 +43,16 @@ const updateIndicators = ({ x, scale }, { brightnessValue, image }) => {
   indicator.style.backgroundPosition = `${indicatorX}px 100%`;
 
   const scaleValueNode = document.querySelector(SELECTORS.scaleValue);
-  scaleValueNode.innerHTML = `${Math.round(scale * PERCENT_PER_UNIT)}%`;
+  if (scaleValueNode) {
+    scaleValueNode.innerHTML = `${Math.round(scale * PERCENT_PER_UNIT)}%`;
+  }
 
   const brightnessValueNode = document.querySelector(SELECTORS.brightnessValue);
-  brightnessValueNode.innerHTML = `${Math.round(brightnessValue * PERCENT_PER_UNIT)}%`;
+  if (brightnessValueNode) {
+    brightnessValueNode.innerHTML = `${Math.round(brightnessValue * PERCENT_PER_UNIT)}%`;
+  }
 };
 
 export {
-  updateIndicators
+  updateIndicators,
 };

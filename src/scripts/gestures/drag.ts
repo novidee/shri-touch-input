@@ -1,15 +1,22 @@
-class DragGesture {
+import { IGesture } from '../abstractions/interfaces';
+import { Point, PointersState } from '../abstractions/types';
+
+const POINTERS_COUNT = 1;
+
+class DragGesture implements IGesture {
+  private lastPosition: Point;
+  private gesturePosition: Point;
+
   constructor() {
     this.lastPosition = { x: 0, y: 0 };
     this.gesturePosition = { x: 0, y: 0 };
-    this.POINTERS_COUNT = 1;
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
   }
 
-  perform(pointers, event, state) {
-    const { gesturePosition, lastPosition, POINTERS_COUNT } = this;
+  perform(pointers: PointerEvent[], event: PointerEvent, state: PointersState) {
+    const { gesturePosition, lastPosition } = this;
 
     if (pointers.length !== POINTERS_COUNT) return state;
 
@@ -28,31 +35,35 @@ class DragGesture {
 
     return Object.assign({}, state, {
       x: newX,
-      y: newY
+      y: newY,
     });
   }
 
-  getMovement(event, gesturePosition) {
+  reset() {
+    this.gesturePosition = { x: 0, y: 0 };
+  }
+
+  getMovement(event: PointerEvent, gesturePosition: Point) {
     const { x, y } = event;
 
     const prevX = gesturePosition.x === 0 ? x : gesturePosition.x;
     const prevY = gesturePosition.y === 0 ? y : gesturePosition.y;
 
-    const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || x - prevX;
-    const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || y - prevY;
+    const movementX = event.movementX || x - prevX;
+    const movementY = event.movementY || y - prevY;
 
     return {
       movementX,
-      movementY
+      movementY,
     };
   }
 
-  onPointerDown(event) {
+  onPointerDown(event: PointerEvent) {
     this.gesturePosition = { x: event.x, y: event.y };
   }
 
   onPointerUp() {
-    this.gesturePosition = { x: 0, y: 0 };
+    this.reset();
   }
 }
 

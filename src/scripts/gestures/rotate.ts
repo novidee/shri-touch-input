@@ -1,19 +1,23 @@
+import { IGesture } from '../abstractions/interfaces';
+import { PointersState } from '../abstractions/types';
 import { getAngle, getMidpoint, getRightestPointer } from '../utils';
 
+const POINTERS_COUNT = 2;
 const UNFOLDED_ANGLE = 180;
 const RIGHT_ANGLE = 90;
 
-class RotateGesture {
+class RotateGesture implements IGesture {
+  private prevAngle: number;
+
   constructor() {
     this.prevAngle = 0;
-    this.POINTERS_COUNT = 2;
 
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerCancel = this.onPointerCancel.bind(this);
   }
 
-  perform(pointers, event, state) {
-    if (pointers.length !== this.POINTERS_COUNT) return state;
+  perform(pointers: PointerEvent[], event: PointerEvent, state: PointersState) {
+    if (pointers.length !== POINTERS_COUNT) return state;
 
     const { prevAngle } = this;
 
@@ -21,7 +25,7 @@ class RotateGesture {
       pointers[0].clientX,
       pointers[1].clientX,
       pointers[0].clientY,
-      pointers[1].clientY
+      pointers[1].clientY,
     );
     const rightestPointer = getRightestPointer(pointers);
 
@@ -29,7 +33,7 @@ class RotateGesture {
       currentCenter.x,
       currentCenter.y,
       rightestPointer.x,
-      rightestPointer.y
+      rightestPointer.y,
     );
 
     if (prevAngle === 0) {
@@ -45,7 +49,7 @@ class RotateGesture {
     this.prevAngle = currentAngle;
 
     return Object.assign({}, state, {
-      angleDistance: distance
+      angleDistance: distance,
     });
   }
 

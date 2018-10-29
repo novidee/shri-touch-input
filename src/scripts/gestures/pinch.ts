@@ -1,29 +1,35 @@
+import { IGesture } from '../abstractions/interfaces';
+import { PointersState } from '../abstractions/types';
 import { getDistanceBetweenTwoPoints } from '../utils';
 
-class PinchGesture {
+const MIN_SCALE = 1;
+const MAX_SCALE = 4;
+const POINTERS_COUNT = 2;
+const MIN_DIFF = 20;
+
+class PinchGesture implements IGesture {
+  private prevDiff: number;
+  private currentScale: number;
+
   constructor() {
     this.prevDiff = -1;
     this.currentScale = 1;
-    this.MIN_SCALE = 1;
-    this.MAX_SCALE = 4;
-    this.POINTERS_COUNT = 2;
-    this.MIN_DIFF = 20;
 
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerCancel = this.onPointerCancel.bind(this);
   }
 
-  perform(pointers, event, state) {
-    if (pointers.length !== this.POINTERS_COUNT) return state;
+  perform(pointers: PointerEvent[], event: PointerEvent, state: PointersState) {
+    if (pointers.length !== POINTERS_COUNT) return state;
 
-    const { prevDiff, MIN_DIFF } = this;
+    const { prevDiff } = this;
 
     const [firstPointer, secondPointer] = pointers;
     const currentDiff = Math.abs(getDistanceBetweenTwoPoints(
       firstPointer.clientX,
       secondPointer.clientX,
       firstPointer.clientY,
-      secondPointer.clientY
+      secondPointer.clientY,
     ));
 
     let newScale = this.currentScale;
@@ -35,7 +41,7 @@ class PinchGesture {
     this.currentScale = newScale;
 
     return Object.assign({}, state, {
-      scale: newScale
+      scale: newScale,
     });
   }
 
@@ -43,8 +49,8 @@ class PinchGesture {
     this.prevDiff = -1;
   }
 
-  changeScaleFactor(scale) {
-    const { currentScale, MAX_SCALE, MIN_SCALE } = this;
+  changeScaleFactor(scale: number) {
+    const { currentScale } = this;
 
     const newScale = currentScale * scale;
     return Math.min(MAX_SCALE, Math.max(newScale, MIN_SCALE));
