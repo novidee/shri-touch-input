@@ -1,14 +1,16 @@
-import { EventHandler } from './abstractions/enums';
 import { PointersState } from './abstractions/types';
+import { IGesture, IGestureHandler } from './abstractions/interfaces';
+import { capitalize } from './utils';
 
 class PointerController {
   private node: Element;
   private pointers: PointerEvent[];
-  private gestures: any;
+  private gestures: IGesture[];
   private state: PointersState;
   private onMove: (state: PointersState) => void;
 
-  constructor({ node, gestures, onMove }: { node: Element, gestures: [], onMove: () => ({}) }) {
+  constructor({ node, gestures, onMove }:
+    { node: Element, gestures: IGesture[], onMove: (state: PointersState) => void }) {
     this.node = node;
     this.pointers = [];
     this.gestures = gestures;
@@ -77,7 +79,8 @@ class PointerController {
 
   notify(event: PointerEvent) {
     this.gestures.forEach((gesture) => {
-      const handler = gesture[EventHandler[event.type]];
+      const [, pointerAction] = event.type.split('pointer');
+      const handler = gesture[<keyof IGestureHandler>`onPointer${capitalize(pointerAction)}`];
 
       if (typeof handler === 'function') handler(event);
     });

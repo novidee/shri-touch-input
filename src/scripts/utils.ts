@@ -19,9 +19,14 @@ function getRightestPointer(pointers: Point[]) {
   return pointers.sort((a, b) => b.x - a.x)[0];
 }
 
+function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export {
   getDistanceBetweenTwoPoints,
   getAngle,
   getMidpoint,
   getRightestPointer,
+  capitalize,
 };

@@ -1,7 +1,8 @@
 import { PointersState } from '../types';
+import { IGestureHandler } from './gesture-handler';
 
-interface IGesture {
-  perform(pointers: PointerEvent[], event: PointerEvent, state: PointersState): void;
+interface IGesture extends IGestureHandler {
+  perform(pointers: PointerEvent[], event: PointerEvent, state: PointersState): PointersState;
   reset(): void;
 }
 
