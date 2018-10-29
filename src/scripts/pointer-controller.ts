@@ -1,19 +1,21 @@
-const EVENT_HANDLER = {
-  pointerdown: 'onPointerDown',
-  pointerup: 'onPointerUp',
-  pointermove: 'onPointerMove',
-  pointercancel: 'onPointerCancel'
-};
+import { EventHandler } from './abstractions/enums';
+import { PointersState } from './abstractions/types';
 
 class PointerController {
-  constructor({ node, gestures, onMove }) {
+  private node: Element;
+  private pointers: PointerEvent[];
+  private gestures: any;
+  private state: PointersState;
+  private onMove: (state: PointersState) => void;
+
+  constructor({ node, gestures, onMove }: { node: Element, gestures: [], onMove: () => ({}) }) {
     this.node = node;
     this.pointers = [];
     this.gestures = gestures;
     this.state = {
       x: 0,
       scale: 1,
-      angleDistance: 0
+      angleDistance: 0,
     };
 
     this.onMove = onMove;
@@ -59,62 +61,67 @@ class PointerController {
     node.addEventListener('pointercancel', this.onPointerCancel);
   }
 
-  removePointer(event) {
+  removePointer(event: PointerEvent) {
     this.pointers = this.pointers.filter(pointer => pointer.pointerId !== event.pointerId);
   }
 
-  addPointer(event) {
+  addPointer(event: PointerEvent) {
     this.pointers = this.pointers.concat(event);
   }
 
-  updatePointer(event) {
+  updatePointer(event: PointerEvent) {
     this.pointers = this.pointers.map(pointer => pointer.pointerId === event.pointerId
       ? event
       : pointer);
   }
 
-  notify(event) {
+  notify(event: PointerEvent) {
     this.gestures.forEach((gesture) => {
-      const handler = gesture[EVENT_HANDLER[event.type]];
+      const handler = gesture[EventHandler[event.type]];
 
       if (typeof handler === 'function') handler(event);
     });
   }
 
-  onPointerUp(event) {
-    if (!this.hasPointerLock()) this.removePointer(event);
+  onPointerUp(event: Event) {
+    const pointerEvent = <PointerEvent>event;
+    if (!this.hasPointerLock()) this.removePointer(pointerEvent);
 
-    this.notify(event);
+    this.notify(<PointerEvent>event);
   }
 
-  onPointerCancel(event) {
-    if (!this.hasPointerLock()) this.removePointer(event);
+  onPointerCancel(event: Event) {
+    const pointerEvent = <PointerEvent>event;
+    if (!this.hasPointerLock()) this.removePointer(pointerEvent);
 
-    this.notify(event);
+    this.notify(pointerEvent);
   }
 
-  onPointerDown(event) {
-    this.addPointer(event);
+  onPointerDown(event: Event) {
+    const pointerEvent = <PointerEvent>event;
+    this.addPointer(pointerEvent);
 
     if (!this.isLocked()) {
       this.node.requestPointerLock();
     } else {
       document.exitPointerLock();
 
-      if (this.hasPointerLock()) this.removePointer(event);
+      if (this.hasPointerLock()) this.removePointer(pointerEvent);
     }
 
-    this.notify(event, this.state);
+    this.notify(pointerEvent);
   }
 
-  onPointerMove(event) {
-    this.updatePointer(event);
-    this.performGestures(event);
+  onPointerMove(event: Event) {
+    const pointerEvent = <PointerEvent>event;
 
-    this.notify(event);
+    this.updatePointer(pointerEvent);
+    this.performGestures(pointerEvent);
+
+    this.notify(pointerEvent);
   }
 
-  performGestures(event) {
+  performGestures(event: PointerEvent) {
     const { gestures, pointers } = this;
 
     gestures.forEach((gesture) => {
