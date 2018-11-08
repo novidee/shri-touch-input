@@ -1,8 +1,7 @@
 import 'pepjs';
-import PinchGesture from './gestures/pinch';
-import RotateGesture from './gestures/rotate';
-import DragGesture from './gestures/drag';
+
 import PointerController from './pointer-controller';
+import Gestures from './gestures';
 import { updateIndicators } from './indicators';
 
 const view = document.querySelector('.panorama-viewer__image');
@@ -48,14 +47,19 @@ const updateImage = (state) => {
 
 const onMove = state => updateImage(state);
 
-const rotateGesture = new RotateGesture();
-const pinchGesture = new PinchGesture();
-const dragGesture = new DragGesture();
+const gestures = new Gestures({
+  onMove
+});
+gestures.init();
 
 const pointerController = new PointerController({
   node: view,
-  gestures: [dragGesture, pinchGesture, rotateGesture],
-  onMove
+  events: {
+    onPointerCancel: gestures.onPointerCancel,
+    onPointerUp: gestures.onPointerUp,
+    onPointerDown: gestures.onPointerDown,
+    onPointerMove: gestures.onPointerMove
+  }
 });
 
 downloadImage().then((resultImage) => {

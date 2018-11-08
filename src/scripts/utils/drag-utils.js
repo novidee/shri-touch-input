@@ -1,0 +1,29 @@
+const getMovement = (event, gesturePosition) => {
+  const { x, y } = event;
+
+  const prevX = gesturePosition.x === 0 ? x : gesturePosition.x;
+  const prevY = gesturePosition.y === 0 ? y : gesturePosition.y;
+
+  const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || x - prevX;
+  const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || y - prevY;
+
+  return {
+    movementX,
+    movementY
+  };
+};
+
+const getNewPosition = ({ dragInfo, event, scale }) => {
+  const { gesturePosition, lastPosition } = dragInfo;
+
+  const { movementX, movementY } = getMovement(event, gesturePosition);
+  const dx = movementX / scale;
+  const dy = movementY / scale;
+
+  return { x: lastPosition.x + dx, y: lastPosition.y + dy };
+};
+
+export {
+  getNewPosition,
+  getMovement
+};

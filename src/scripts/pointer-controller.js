@@ -1,22 +1,18 @@
-const EVENT_HANDLER = {
-  pointerdown: 'onPointerDown',
-  pointerup: 'onPointerUp',
-  pointermove: 'onPointerMove',
-  pointercancel: 'onPointerCancel'
-};
+import { dispatch, getState, subscribe as storeSubscribe } from './store';
+import pointerActions from './actions/pointer-actions';
 
 class PointerController {
-  constructor({ node, gestures, onMove }) {
+  constructor({ node, events }) {
     this.node = node;
-    this.pointers = [];
-    this.gestures = gestures;
-    this.state = {
-      x: 0,
-      scale: 1,
-      angleDistance: 0
-    };
+    this.pointers = getState().pointers;
+    this.events = events;
 
-    this.onMove = onMove;
+    this.removePointer = event => dispatch(pointerActions.pointerRemove(event.pointerId));
+    this.addPointer = event => dispatch(pointerActions.pointerAdd(event));
+    this.updatePointer = event => dispatch(pointerActions.pointerUpdate(event));
+    this.hasPointerLock = () => 'pointerLockElement' in document
+      || 'mozPointerLockElement' in document
+      || 'webkitPointerLockElement' in document;
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
@@ -38,16 +34,10 @@ class PointerController {
       || this.node === document.webkitPointerLockElement;
   }
 
-  hasPointerLock() {
-    return 'pointerLockElement' in document
-      || 'mozPointerLockElement' in document
-      || 'webkitPointerLockElement' in document;
-  }
-
   init() {
     this.subscribeEvents();
 
-    this.onMove(this.state);
+    storeSubscribe((state) => { this.pointers = state.pointers; });
   }
 
   subscribeEvents() {
@@ -59,38 +49,16 @@ class PointerController {
     node.addEventListener('pointercancel', this.onPointerCancel);
   }
 
-  removePointer(event) {
-    this.pointers = this.pointers.filter(pointer => pointer.pointerId !== event.pointerId);
-  }
-
-  addPointer(event) {
-    this.pointers = this.pointers.concat(event);
-  }
-
-  updatePointer(event) {
-    this.pointers = this.pointers.map(pointer => pointer.pointerId === event.pointerId
-      ? event
-      : pointer);
-  }
-
-  notify(event) {
-    this.gestures.forEach((gesture) => {
-      const handler = gesture[EVENT_HANDLER[event.type]];
-
-      if (typeof handler === 'function') handler(event);
-    });
-  }
-
   onPointerUp(event) {
     if (!this.hasPointerLock()) this.removePointer(event);
 
-    this.notify(event);
+    this.events.onPointerUp(event, this.pointers);
   }
 
   onPointerCancel(event) {
     if (!this.hasPointerLock()) this.removePointer(event);
 
-    this.notify(event);
+    this.events.onPointerCancel(event, this.pointers);
   }
 
   onPointerDown(event) {
@@ -104,25 +72,15 @@ class PointerController {
       if (this.hasPointerLock()) this.removePointer(event);
     }
 
-    this.notify(event, this.state);
+    this.events.onPointerDown(event, this.pointers);
   }
 
   onPointerMove(event) {
     this.updatePointer(event);
-    this.performGestures(event);
 
-    this.notify(event);
-  }
-
-  performGestures(event) {
-    const { gestures, pointers } = this;
-
-    gestures.forEach((gesture) => {
-      this.state = gesture.perform(pointers, event, this.state);
-    });
-
-    this.onMove(this.state);
+    this.events.onPointerMove(event, this.pointers);
   }
 }
+
 
 export default PointerController;

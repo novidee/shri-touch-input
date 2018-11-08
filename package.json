@@ -8,7 +8,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "pepjs": "0.4.3"
+    "pepjs": "0.4.3",
+    "shri-architecture": "github:ronuar/shri-architecture"
   },
   "devDependencies": {
     "@babel/core": "7.1.2",
