@@ -7,9 +7,15 @@ const INITIAL_STATE = {
 };
 
 const handlers = {
-  positionChange(state, newX) {
+  positionChange(state, x) {
     return Object.assign({}, state, {
-      x: newX
+      x
+    });
+  },
+
+  scaleChange(state, scale) {
+    return Object.assign({}, state, {
+      scale
     });
   }
 };

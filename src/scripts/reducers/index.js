@@ -5,7 +5,7 @@ import viewReducer from './view-reducer';
 
 const reducers = {
   drag: dragReducer,
-  // pinch: pinchReducer,
+  pinch: pinchReducer,
   // rotate: rotateReducer,
   view: viewReducer
 };

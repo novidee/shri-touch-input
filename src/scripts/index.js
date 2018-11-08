@@ -55,7 +55,7 @@ const dragGesture = new DragGesture();
 
 const pointerController = new PointerController({
   node: view,
-  gestures: [pinchGesture, rotateGesture],
+  gestures: [rotateGesture],
   onMove
 });
 

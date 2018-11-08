@@ -1,7 +1,10 @@
 import { dispatch, getState, subscribe as storeSubscribe } from './store';
 import dragActions from './actions/drag-actions';
+import pinchActions from './actions/pinch-actions';
 import viewActions from './actions/view-actions';
 import { getMovement } from './utils/drag-utils';
+import { changeScaleFactor } from './utils/pinch-utils';
+import { getDistanceBetweenTwoPoints } from './utils';
 
 const EVENT_HANDLER = {
   pointerdown: 'onPointerDown',
@@ -91,12 +94,15 @@ class PointerController {
     this.notify(event);
 
     dispatch(dragActions.dragStop());
+    dispatch(pinchActions.pinchStop());
   }
 
   onPointerCancel(event) {
     if (!this.hasPointerLock()) this.removePointer(event);
 
     this.notify(event);
+
+    dispatch(pinchActions.pinchStop());
   }
 
   onPointerDown(event) {
@@ -128,6 +134,29 @@ class PointerController {
     // gestures.forEach((gesture) => {
     //   this.state.view = gesture.perform(pointers, event, this.state.view);
     // });
+
+    if (pointers.length === 2) {
+      const MIN_DIFF = 20;
+      const MAX_SCALE = 4;
+      const MIN_SCALE = 1;
+      const { prevDiff, currentScale } = this.state.pinch;
+
+      const [firstPointer, secondPointer] = pointers;
+      const currentDiff = Math.abs(getDistanceBetweenTwoPoints(
+        firstPointer.clientX,
+        secondPointer.clientX,
+        firstPointer.clientY,
+        secondPointer.clientY
+      ));
+
+      let newScale = currentScale;
+      if (prevDiff > 0 && Math.abs(currentDiff - prevDiff) < MIN_DIFF) {
+        newScale = changeScaleFactor(newScale, currentDiff / prevDiff, MAX_SCALE, MIN_SCALE);
+      }
+
+      dispatch(pinchActions.pinch({ scale: newScale, diff: currentDiff }));
+      dispatch(viewActions.scaleChange(newScale));
+    }
 
     if (pointers.length === 1) {
       const newPosition = getNewPosition(this.state, event);
