@@ -17,6 +17,12 @@ const handlers = {
     return Object.assign({}, state, {
       scale
     });
+  },
+
+  angleDistanceChange(state, angleDistance) {
+    return Object.assign({}, state, {
+      angleDistance
+    });
   }
 };
 

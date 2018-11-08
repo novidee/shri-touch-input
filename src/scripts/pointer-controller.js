@@ -1,10 +1,11 @@
 import { dispatch, getState, subscribe as storeSubscribe } from './store';
 import dragActions from './actions/drag-actions';
 import pinchActions from './actions/pinch-actions';
+import rotateActions from './actions/rotate-actions';
 import viewActions from './actions/view-actions';
 import { getMovement } from './utils/drag-utils';
 import { changeScaleFactor } from './utils/pinch-utils';
-import { getDistanceBetweenTwoPoints } from './utils';
+import { getAngle, getDistanceBetweenTwoPoints, getMidpoint, getRightestPointer } from './utils';
 
 const EVENT_HANDLER = {
   pointerdown: 'onPointerDown',
@@ -14,10 +15,9 @@ const EVENT_HANDLER = {
 };
 
 class PointerController {
-  constructor({ node, gestures, onMove }) {
+  constructor({ node, onMove }) {
     this.node = node;
     this.pointers = [];
-    this.gestures = gestures;
     this.state = getState();
 
     this.onMove = onMove;
@@ -95,6 +95,7 @@ class PointerController {
 
     dispatch(dragActions.dragStop());
     dispatch(pinchActions.pinchStop());
+    dispatch(rotateActions.rotateStop());
   }
 
   onPointerCancel(event) {
@@ -103,6 +104,7 @@ class PointerController {
     this.notify(event);
 
     dispatch(pinchActions.pinchStop());
+    dispatch(rotateActions.rotateStop());
   }
 
   onPointerDown(event) {
@@ -129,11 +131,7 @@ class PointerController {
   }
 
   performGestures(event) {
-    const { gestures, pointers } = this;
-
-    // gestures.forEach((gesture) => {
-    //   this.state.view = gesture.perform(pointers, event, this.state.view);
-    // });
+    const { pointers } = this;
 
     if (pointers.length === 2) {
       const MIN_DIFF = 20;
@@ -156,6 +154,40 @@ class PointerController {
 
       dispatch(pinchActions.pinch({ scale: newScale, diff: currentDiff }));
       dispatch(viewActions.scaleChange(newScale));
+
+      // ---- -- - - -- - -- - - - -- -- -
+
+      const UNFOLDED_ANGLE = 180;
+      const RIGHT_ANGLE = 90;
+      const { prevAngle } = this.state.rotate;
+
+      const currentCenter = getMidpoint(
+        pointers[0].clientX,
+        pointers[1].clientX,
+        pointers[0].clientY,
+        pointers[1].clientY
+      );
+      const rightestPointer = getRightestPointer(pointers);
+
+      const currentAngle = getAngle(
+        currentCenter.x,
+        currentCenter.y,
+        rightestPointer.x,
+        rightestPointer.y
+      );
+
+      if (prevAngle === 0) {
+        dispatch(rotateActions.rotate(currentAngle));
+        return;
+      }
+
+      let distance = prevAngle - currentAngle;
+
+      if (distance > RIGHT_ANGLE) distance -= UNFOLDED_ANGLE;
+      else if (distance < -RIGHT_ANGLE) distance += UNFOLDED_ANGLE;
+
+      dispatch(rotateActions.rotate(currentAngle));
+      dispatch(viewActions.angleDistanceChange(distance));
     }
 
     if (pointers.length === 1) {

@@ -2,7 +2,8 @@ import { createActions } from 'shri-architecture';
 
 const viewActions = [
   'positionChange',
-  'scaleChange'
+  'scaleChange',
+  'angleDistanceChange'
 ];
 
 export default createActions(viewActions);

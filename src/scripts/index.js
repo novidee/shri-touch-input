@@ -1,8 +1,5 @@
 import 'pepjs';
 
-import PinchGesture from './gestures/pinch';
-import RotateGesture from './gestures/rotate';
-import DragGesture from './gestures/drag';
 import PointerController from './pointer-controller';
 import { updateIndicators } from './indicators';
 
@@ -49,13 +46,8 @@ const updateImage = (state) => {
 
 const onMove = state => updateImage(state);
 
-const rotateGesture = new RotateGesture();
-const pinchGesture = new PinchGesture();
-const dragGesture = new DragGesture();
-
 const pointerController = new PointerController({
   node: view,
-  gestures: [rotateGesture],
   onMove
 });
 
