@@ -13,6 +13,17 @@ const getMovement = (event, gesturePosition) => {
   };
 };
 
+const getNewPosition = ({ dragInfo, event, scale }) => {
+  const { gesturePosition, lastPosition } = dragInfo;
+
+  const { movementX, movementY } = getMovement(event, gesturePosition);
+  const dx = movementX / scale;
+  const dy = movementY / scale;
+
+  return { x: lastPosition.x + dx, y: lastPosition.y + dy };
+};
+
 export {
+  getNewPosition,
   getMovement
 };

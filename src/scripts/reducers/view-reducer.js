@@ -7,24 +7,10 @@ const INITIAL_STATE = {
 };
 
 const handlers = {
-  positionChange(state, x) {
+  fieldChange(state, { field, value }) {
     return {
       ...state,
-      x
-    };
-  },
-
-  scaleChange(state, scale) {
-    return {
-      ...state,
-      scale
-    };
-  },
-
-  angleDistanceChange(state, angleDistance) {
-    return {
-      ...state,
-      angleDistance
+      [field]: value
     };
   }
 };

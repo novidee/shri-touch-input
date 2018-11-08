@@ -6,15 +6,17 @@ const INITIAL_STATE = {
 
 const handlers = {
   rotateStop(state) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       prevAngle: INITIAL_STATE.prevAngle
-    });
+    };
   },
 
   rotate(state, angle) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       prevAngle: angle
-    });
+    };
   }
 };
 

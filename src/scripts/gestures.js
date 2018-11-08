@@ -2,10 +2,10 @@ import { dispatch, getState, subscribe as storeSubscribe } from './store';
 import pinchActions from './actions/pinch-actions';
 import rotateActions from './actions/rotate-actions';
 import dragActions from './actions/drag-actions';
-import { getAngle, getDistanceBetweenTwoPoints, getMidpoint, getRightestPointer } from './utils';
 import viewActions from './actions/view-actions';
-import { changeScaleFactor } from './utils/pinch-utils';
-import { getMovement } from './utils/drag-utils';
+import { calculateDiff, calculateScale } from './utils/pinch-utils';
+import { getNewPosition } from './utils/drag-utils';
+import { calculateAngle, calculateDistance } from './utils/rotate-utils';
 
 class Gestures {
   constructor({ onMove }) {
@@ -16,7 +16,7 @@ class Gestures {
   }
 
   init() {
-    storeSubscribe(state => {
+    storeSubscribe((state) => {
       this.onMove(state.view);
       this.state = state;
     });
@@ -38,81 +38,41 @@ class Gestures {
   }
 
   onPointerMove(event, pointers) {
+    const { pinch: pinchInfo, rotate: rotateInfo, drag: dragInfo, view: viewInfo } = this.state;
+
     if (pointers.length === 2) {
-      const MIN_DIFF = 20;
-      const MAX_SCALE = 4;
-      const MIN_SCALE = 1;
-      const { prevDiff, currentScale } = this.state.pinch;
-
-      const [firstPointer, secondPointer] = pointers;
-      const currentDiff = Math.abs(getDistanceBetweenTwoPoints(
-        firstPointer.clientX,
-        secondPointer.clientX,
-        firstPointer.clientY,
-        secondPointer.clientY
-      ));
-
-      let newScale = currentScale;
-      if (prevDiff > 0 && Math.abs(currentDiff - prevDiff) < MIN_DIFF) {
-        newScale = changeScaleFactor(newScale, currentDiff / prevDiff, MAX_SCALE, MIN_SCALE);
-      }
+      const currentDiff = calculateDiff(pointers);
+      const newScale = calculateScale({ pinchInfo, currentDiff });
 
       dispatch(pinchActions.pinch({ scale: newScale, diff: currentDiff }));
-      dispatch(viewActions.scaleChange(newScale));
+      dispatch(viewActions.fieldChange({ field: 'scale', value: newScale }));
 
-      // ---- -- - - -- - -- - - - -- -- -
 
-      const UNFOLDED_ANGLE = 180;
-      const RIGHT_ANGLE = 90;
-      const { prevAngle } = this.state.rotate;
-
-      const currentCenter = getMidpoint(
-        pointers[0].clientX,
-        pointers[1].clientX,
-        pointers[0].clientY,
-        pointers[1].clientY
-      );
-      const rightestPointer = getRightestPointer(pointers);
-
-      const currentAngle = getAngle(
-        currentCenter.x,
-        currentCenter.y,
-        rightestPointer.x,
-        rightestPointer.y
-      );
+      const { prevAngle } = rotateInfo;
+      const angle = calculateAngle({ pointers });
 
       if (prevAngle === 0) {
-        dispatch(rotateActions.rotate(currentAngle));
+        dispatch(rotateActions.rotate(angle));
         return;
       }
 
-      let distance = prevAngle - currentAngle;
+      const distance = calculateDistance({ prevAngle, angle });
 
-      if (distance > RIGHT_ANGLE) distance -= UNFOLDED_ANGLE;
-      else if (distance < -RIGHT_ANGLE) distance += UNFOLDED_ANGLE;
-
-      dispatch(rotateActions.rotate(currentAngle));
-      dispatch(viewActions.angleDistanceChange(distance));
+      dispatch(rotateActions.rotate(angle));
+      dispatch(viewActions.fieldChange({ field: 'angleDistance', value: distance }));
     }
 
     if (pointers.length === 1) {
-      const newPosition = getNewPosition(this.state, event);
+      const newPosition = getNewPosition({
+        scale: viewInfo.scale,
+        dragInfo,
+        event
+      });
 
       dispatch(dragActions.drag({ newPosition, event }));
-      dispatch(viewActions.positionChange(newPosition.x));
+      dispatch(viewActions.fieldChange({ field: 'x', value: newPosition.x }));
     }
   }
-}
-
-function getNewPosition(state, event) {
-  const { gesturePosition, lastPosition } = state.drag;
-  const { scale } = state.view;
-
-  const { movementX, movementY } = getMovement(event, gesturePosition);
-  const dx = movementX / scale;
-  const dy = movementY / scale;
-
-  return { x: lastPosition.x + dx, y: lastPosition.y + dy };
 }
 
 export default Gestures;

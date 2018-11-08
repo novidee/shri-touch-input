@@ -7,15 +7,17 @@ const INITIAL_STATE = {
 
 const handlers = {
   dragStart(state, { x, y }) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       gesturePosition: { x, y }
-    });
+    };
   },
 
   dragStop(state) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       gesturePosition: INITIAL_STATE.gesturePosition
-    });
+    };
   },
 
   drag(state, { newPosition, event }) {

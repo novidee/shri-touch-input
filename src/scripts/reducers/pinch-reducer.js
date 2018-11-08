@@ -7,16 +7,18 @@ const INITIAL_STATE = {
 
 const handlers = {
   pinchStop(state) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       prevDiff: INITIAL_STATE.prevDiff
-    });
+    };
   },
 
   pinch(state, { diff, scale }) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       prevDiff: diff,
       currentScale: scale
-    });
+    };
   }
 };
 
