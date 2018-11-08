@@ -1,12 +1,9 @@
 import { createReducer } from 'shri-architecture';
-import { getMovement } from '../utils/drag-utils';
 
 const INITIAL_STATE = {
   lastPosition: { x: 0, y: 0 },
   gesturePosition: { x: 0, y: 0 }
 };
-
-const POINTERS_COUNT = 1;
 
 const handlers = {
   dragStart(state, { x, y }) {

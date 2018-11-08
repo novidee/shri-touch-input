@@ -8,21 +8,24 @@ const INITIAL_STATE = {
 
 const handlers = {
   positionChange(state, x) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       x
-    });
+    };
   },
 
   scaleChange(state, scale) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       scale
-    });
+    };
   },
 
   angleDistanceChange(state, angleDistance) {
-    return Object.assign({}, state, {
+    return {
+      ...state,
       angleDistance
-    });
+    };
   }
 };
 
