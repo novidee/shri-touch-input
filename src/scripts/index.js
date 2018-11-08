@@ -1,4 +1,5 @@
 import 'pepjs';
+
 import PinchGesture from './gestures/pinch';
 import RotateGesture from './gestures/rotate';
 import DragGesture from './gestures/drag';
@@ -54,7 +55,7 @@ const dragGesture = new DragGesture();
 
 const pointerController = new PointerController({
   node: view,
-  gestures: [dragGesture, pinchGesture, rotateGesture],
+  gestures: [pinchGesture, rotateGesture],
   onMove
 });
 

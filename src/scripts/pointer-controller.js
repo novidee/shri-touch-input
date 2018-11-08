@@ -1,3 +1,8 @@
+import { dispatch, getState, subscribe as storeSubscribe } from './store';
+import dragActions from './actions/drag-actions';
+import viewActions from './actions/view-actions';
+import { getMovement } from './utils/drag-utils';
+
 const EVENT_HANDLER = {
   pointerdown: 'onPointerDown',
   pointerup: 'onPointerUp',
@@ -10,11 +15,7 @@ class PointerController {
     this.node = node;
     this.pointers = [];
     this.gestures = gestures;
-    this.state = {
-      x: 0,
-      scale: 1,
-      angleDistance: 0
-    };
+    this.state = getState();
 
     this.onMove = onMove;
 
@@ -47,7 +48,10 @@ class PointerController {
   init() {
     this.subscribeEvents();
 
-    this.onMove(this.state);
+    storeSubscribe(state => {
+      this.onMove(state.view);
+      this.state = state;
+    });
   }
 
   subscribeEvents() {
@@ -85,6 +89,8 @@ class PointerController {
     if (!this.hasPointerLock()) this.removePointer(event);
 
     this.notify(event);
+
+    dispatch(dragActions.dragStop());
   }
 
   onPointerCancel(event) {
@@ -104,7 +110,9 @@ class PointerController {
       if (this.hasPointerLock()) this.removePointer(event);
     }
 
-    this.notify(event, this.state);
+    this.notify(event, this.state.view);
+
+    dispatch(dragActions.dragStart({ x: event.x, y: event.y }));
   }
 
   onPointerMove(event) {
@@ -117,12 +125,28 @@ class PointerController {
   performGestures(event) {
     const { gestures, pointers } = this;
 
-    gestures.forEach((gesture) => {
-      this.state = gesture.perform(pointers, event, this.state);
-    });
+    // gestures.forEach((gesture) => {
+    //   this.state.view = gesture.perform(pointers, event, this.state.view);
+    // });
 
-    this.onMove(this.state);
+    if (pointers.length === 1) {
+      const newPosition = getNewPosition(this.state, event);
+
+      dispatch(dragActions.drag({ newPosition, event }));
+      dispatch(viewActions.positionChange(newPosition.x));
+    }
   }
+}
+
+function getNewPosition(state, event) {
+  const { gesturePosition, lastPosition } = state.drag;
+  const { scale } = state.view;
+
+  const { movementX, movementY } = getMovement(event, gesturePosition);
+  const dx = movementX / scale;
+  const dy = movementY / scale;
+
+  return { x: lastPosition.x + dx, y: lastPosition.y + dy };
 }
 
 export default PointerController;
